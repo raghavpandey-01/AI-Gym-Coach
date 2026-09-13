@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.env/
+
+#env resources
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+Main App/data.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+#ide files
+.vscode/
+.idea/
+
+# Test media
+*.mp3
+*.wav
