@@ -60,9 +60,17 @@ def main():
         st.title("🏋️‍♂️ Form-Check AI Coach")
 
         if st.session_state.username:
-            st.caption(f"👤 Login as {st.session_state.username}")
+            col1 , col2 = st.columns(2)
 
-        st.divider()
+            with col1:
+                st.caption(f"👤 Login as {st.session_state.username}")
+
+            with col2:
+                if st.button("Logout"):
+                    st.session_state.clear()
+                    st.rerun()
+
+        # st.divider()
 
         st.subheader("Workout Plan")
 
@@ -103,8 +111,28 @@ def main():
             exercise = st.session_state.get("exercise_type")
             sets = st.session_state.get("target_sets")
             reps = st.session_state.get("reps_per_set")
+            total_required_reps = sets * reps
+
+            if(st.session_state.get("reps") >= total_required_reps and not st.session_state.get("Last_notified_workout_complete")):
+                st.session_state.Last_notified_workout_complete = True
+                st.session_state.workout_started = False
+
+                if st.session_state.voice_pipeline:
+                    result = st.session_state.voice_pipeline.process_event(
+                        event="Session Completed",
+                        exercise=exercise,
+                        metrics={}
+                    )
+                    if result:
+                        st.session_state.audio_to_play, st.session_state.coach_feedback = result
+
+                st.session_state.reps = 0
+                st.session_state.sets_completed = 0
+                
+                st.rerun()
 
             st.info(f"**{exercise}** -- {sets} Sets / {reps} Reps")
+            
 
             end_session_button = st.button("End Workout", key="end_session_button", width="stretch")
 
@@ -123,7 +151,6 @@ def main():
                 st.rerun()
 
         if workout_started:
-            st.divider()
 
             exercise = st.session_state.get("exercise_type")
             total_reps = st.session_state.get("reps")
@@ -138,7 +165,7 @@ def main():
             st.metric("Current Set Reps", f"{current_set_reps} / {reps_per_set}")
             st.metric("Sets Completed", f"{sets_completed} / {target_sets}")
 
-            st.divider()
+            # st.divider()
 
             if exercise == "Squats":
                 st.subheader("Squat Metrics")

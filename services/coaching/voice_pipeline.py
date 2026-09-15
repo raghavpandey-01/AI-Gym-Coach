@@ -3,7 +3,7 @@ import streamlit as st
 
 class VoicePipeline:
     def __init__(self,llm,tts):
-        self.llm = llm
+        self.llm = llm 
         self.tts = tts
         self.last_spoken_at = 0
 
@@ -104,7 +104,7 @@ class VoicePipeline:
 
         now = time.time()
 
-        is_major_issue = event in ["workout_started", "set_completed", "workout_completed"]
+        is_major_issue = event in ["workout_started", "set_completed", "workout_completed", "Session Completed"]
 
         if not is_major_issue:
             if not issue:
