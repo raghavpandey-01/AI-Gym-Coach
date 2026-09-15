@@ -1,4 +1,5 @@
 import math
+import streamlit as st
 from core.base_exercise import BaseExercise
 
 
@@ -48,13 +49,6 @@ class BicepsCurlDetector(BaseExercise):
 
         key_landmarks_visible = landmarks[shoulder_idx].visibility > self.MIN_VISIBILITY and landmarks[elbow_idx].visibility > self.MIN_VISIBILITY and landmarks[wrist_idx].visibility > self.MIN_VISIBILITY
 
-        if key_landmarks_visible:
-            if elbow_angle < self.UP_THRESHOLD:
-                self.stage = "up"
-
-            if elbow_angle > self.DOWN_THRESHOLD and self.stage == "up":
-                self.stage = "down"
-                self.reps += 1
 
         shoulder_x = landmarks[shoulder_idx].x
         elbow_x = landmarks[elbow_idx].x
@@ -80,6 +74,31 @@ class BicepsCurlDetector(BaseExercise):
             swing_status = "NO SWING"
         else:
             swing_status = "SWINGING"
+
+        if key_landmarks_visible:
+            if elbow_angle < self.UP_THRESHOLD:
+                self.stage = "up"
+        
+            if elbow_angle > self.DOWN_THRESHOLD and self.stage == "up":
+                self.stage = "down"
+
+                if shoulder_status == "STABLE" and swing_status == "NO SWING":
+                    self.reps += 1
+                else:
+                    self.reps += 0  # Invalid rep due to form issues
+                    self.stage = None
+
+                    if st.session_state.voice_pipeline:
+                        result = st.session_state.voice_pipeline.process_event(
+                            event="Invalid rep detected due to form issues. Please ensure your elbow is stable and avoid swinging your torso.",
+                            exercise="Biceps Curl",
+                            metrics={}
+                        )
+
+                        if result:
+                            st.session_state.voice_pipeline.speak, st.session_state.coach_feedback = result
+
+                    st.rerun()
 
         return {
             "reps": self.reps,
