@@ -1,5 +1,5 @@
 from core.base_exercise import BaseExercise
-
+import streamlit as st
 
 class LungesDetector(BaseExercise):
     DOWN_THRESHOLD = 100
@@ -51,14 +51,6 @@ class LungesDetector(BaseExercise):
 
         key_landmarks_visible = landmarks[front_hip_idx].visibility > self.MIN_VISIBILITY and landmarks[front_knee_idx].visibility > self.MIN_VISIBILITY and landmarks[front_ankle_idx].visibility > self.MIN_VISIBILITY
 
-        if key_landmarks_visible:
-            if front_knee_angle < self.DOWN_THRESHOLD:
-                self.stage = "down"
-
-            if front_knee_angle > self.UP_THRESHOLD and self.stage == "down":
-                self.stage = "up"
-                self.reps += 1
-
         torso_angle = self.calculate_angle(
             self.get_point(landmarks, shoulder_idx_for_torso),
             self.get_point(landmarks, front_hip_idx),
@@ -73,6 +65,28 @@ class LungesDetector(BaseExercise):
             balance_status = "BALANCED"
         else:
             balance_status = "OFF BALANCE"
+
+        if key_landmarks_visible:
+            if front_knee_angle < self.DOWN_THRESHOLD:
+                self.stage = "down"
+        
+            if front_knee_angle > self.UP_THRESHOLD and self.stage == "down":
+                self.stage = "up"
+
+                if balance_status == "BALANCED":
+                    self.reps += 1
+                else:
+                    self.stage = None
+                    if st.session_state.voice_pipeline:
+                        result = st.session_state.voice_pipeline.process_event(
+                            event = "Invalid rep detected due to balance issues. Please ensure your weight is centered and maintain a stable stance.",
+                            exercise = "Lunges",
+                            metrics = {}
+                        )
+                        if result:
+                            st.session_state.voice_pipeline.speak, st.session_state.coach_feedback = result
+
+                    st.rerun()
 
         return {
             "reps": self.reps,
