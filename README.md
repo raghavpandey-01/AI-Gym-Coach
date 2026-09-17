@@ -4,6 +4,11 @@ An AI-powered workout assistant that uses **computer vision and pose estimation*
 
 The project uses **MediaPipe Pose Landmarker** for real-time body-pose detection and exercise-specific logic to analyze workout movements.
 
+## 🚀 Live Demo
+
+👉 **Try AI-GYM Trainer:**  
+https://ai-gym-coach01.streamlit.app/
+
 ---
 
 ## ✨ Features
